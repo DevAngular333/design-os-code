@@ -10,6 +10,7 @@ import { lintCommand } from "./lint-command.js";
 import { loginCommand, LoginError } from "./login-command.js";
 import { initCommand } from "./init-command.js";
 import { pathsCommand } from "./paths-command.js";
+import { reviewCommand } from "./review-command.js";
 import { RunAbort, runCommand } from "./run-command.js";
 import { scanCommand } from "./scan-command.js";
 import { serveCommand } from "./serve-command.js";
@@ -32,10 +33,11 @@ const USAGE = `code2flow — living user-flow canvas from a web codebase (100% l
   code2flow stories validate <repo>              check the Story Manifest against the graph
   code2flow lint <repo> [--fail-on error|warn]   broken links, orphans, dead-ends, needs-sample, captures
   code2flow diff <repo> --from <graph.json|repo> what changed since an earlier scan
+  code2flow review <repo> --from <graph.json|repo> [--focus term,term] create an offline Review Pack checklist
 `;
 
 /** Flags that take a value: `--flag --other` or a trailing `--flag` is a usage error, not silently `true`. */
-const VALUE_FLAGS = new Set(["url", "storage-state", "concurrency", "feature", "story", "out", "scale", "from", "to", "max", "dev", "fail-on", "email-env", "password-env", "path", "success-url"]);
+const VALUE_FLAGS = new Set(["url", "storage-state", "concurrency", "feature", "story", "out", "scale", "from", "to", "max", "dev", "fail-on", "email-env", "password-env", "path", "success-url", "focus", "before-label", "after-label", "before-ref", "after-ref", "product"]);
 const BOOLEAN_FLAGS = new Set(["orphans", "dead-ends", "shell", "json", "headed", "exit-code", "no-skills", "png", "pdf", "manual", "relogin", "no-live"]);
 
 /** Tiny argv parser: positionals + --flag value / --flag. No dependency needed for nine commands. */
@@ -75,6 +77,7 @@ export async function main(argv: string[]): Promise<number> {
       case "stories": if (!positionals[0] || !positionals[1]) return usage("stories: usage  code2flow stories scaffold <repo> <prd.md> | validate <repo>"); return await storiesCommand(positionals[0], positionals[1], positionals[2]); // sub-command first, then <repo>
       case "lint": if (!repo) return usage("lint: missing <repo>"); return await lintCommand(repo, flags);
       case "diff": if (!repo) return usage("diff: missing <repo>"); return await diffCommand(repo, flags);
+      case "review": if (!repo) return usage("review: missing <repo>"); await reviewCommand(repo, flags); return 0;
       case "--help": console.log(USAGE); return 0;
       default: console.log(USAGE); return command ? 2 : 0;
     }

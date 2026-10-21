@@ -1,0 +1,364 @@
+{
+  "version": 1,
+  "product": "Northwind CRM (synthetic)",
+  "createdAt": "2026-10-21T12:45:59.199Z",
+  "source": {
+    "before": {
+      "label": "CRM v1 · synthetic",
+      "ref": "fixtures/review-pack/crm-v1"
+    },
+    "after": {
+      "label": "CRM v2 · synthetic",
+      "ref": "fixtures/review-pack/crm-v2"
+    }
+  },
+  "focusTerms": [
+    "order",
+    "status"
+  ],
+  "items": [
+    {
+      "id": "screen:added:/orders-status",
+      "kind": "screen",
+      "change": "added",
+      "label": "Screen added: /orders-status",
+      "evidence": {
+        "after": {
+          "file": "orders-status.html"
+        }
+      },
+      "sourceRefs": [
+        "orders-status.html"
+      ],
+      "relation": "related",
+      "rationale": "Matched focus terms: order, status.",
+      "status": "todo",
+      "note": ""
+    },
+    {
+      "id": "screen:added:/settings-profile",
+      "kind": "screen",
+      "change": "added",
+      "label": "Screen added: /settings-profile",
+      "evidence": {
+        "after": {
+          "file": "settings-profile.html"
+        }
+      },
+      "sourceRefs": [
+        "settings-profile.html"
+      ],
+      "relation": "unrelated",
+      "rationale": "No supplied focus term appears in the changed label or source reference.",
+      "status": "todo",
+      "note": ""
+    },
+    {
+      "id": "edge:added:screen|/customers -> /orders-status|Link: Review order status",
+      "kind": "edge",
+      "change": "added",
+      "label": "Transition added: /customers → /orders-status · Link: Review order status",
+      "evidence": {
+        "after": {
+          "file": "customers.html",
+          "line": 2
+        }
+      },
+      "sourceRefs": [
+        "customers.html:2"
+      ],
+      "relation": "related",
+      "rationale": "Matched focus terms: order, status.",
+      "status": "todo",
+      "note": ""
+    },
+    {
+      "id": "edge:added:screen|/orders-status -> /customers|Link: Customers",
+      "kind": "edge",
+      "change": "added",
+      "label": "Transition added: /orders-status → /customers · Link: Customers",
+      "evidence": {
+        "after": {
+          "file": "orders-status.html",
+          "line": 2
+        }
+      },
+      "sourceRefs": [
+        "orders-status.html:2"
+      ],
+      "relation": "related",
+      "rationale": "Matched focus terms: order, status.",
+      "status": "todo",
+      "note": ""
+    },
+    {
+      "id": "edge:added:screen|/orders-status -> /settings|Link: Settings",
+      "kind": "edge",
+      "change": "added",
+      "label": "Transition added: /orders-status → /settings · Link: Settings",
+      "evidence": {
+        "after": {
+          "file": "orders-status.html",
+          "line": 2
+        }
+      },
+      "sourceRefs": [
+        "orders-status.html:2"
+      ],
+      "relation": "related",
+      "rationale": "Matched focus terms: order, status.",
+      "status": "todo",
+      "note": ""
+    },
+    {
+      "id": "edge:added:screen|/orders-status -> /|Link: Dashboard",
+      "kind": "edge",
+      "change": "added",
+      "label": "Transition added: /orders-status → / · Link: Dashboard",
+      "evidence": {
+        "after": {
+          "file": "orders-status.html",
+          "line": 2
+        }
+      },
+      "sourceRefs": [
+        "orders-status.html:2"
+      ],
+      "relation": "related",
+      "rationale": "Matched focus terms: order, status.",
+      "status": "todo",
+      "note": ""
+    },
+    {
+      "id": "edge:added:screen|/settings -> /settings-profile|Link: Profile settings",
+      "kind": "edge",
+      "change": "added",
+      "label": "Transition added: /settings → /settings-profile · Link: Profile settings",
+      "evidence": {
+        "after": {
+          "file": "settings.html",
+          "line": 2
+        }
+      },
+      "sourceRefs": [
+        "settings.html:2"
+      ],
+      "relation": "unrelated",
+      "rationale": "No supplied focus term appears in the changed label or source reference.",
+      "status": "todo",
+      "note": ""
+    },
+    {
+      "id": "edge:added:screen|/settings-profile -> /settings|Link: Settings",
+      "kind": "edge",
+      "change": "added",
+      "label": "Transition added: /settings-profile → /settings · Link: Settings",
+      "evidence": {
+        "after": {
+          "file": "settings-profile.html",
+          "line": 2
+        }
+      },
+      "sourceRefs": [
+        "settings-profile.html:2"
+      ],
+      "relation": "unrelated",
+      "rationale": "No supplied focus term appears in the changed label or source reference.",
+      "status": "todo",
+      "note": ""
+    },
+    {
+      "id": "edge:added:screen|/settings-profile -> /|Link: Dashboard",
+      "kind": "edge",
+      "change": "added",
+      "label": "Transition added: /settings-profile → / · Link: Dashboard",
+      "evidence": {
+        "after": {
+          "file": "settings-profile.html",
+          "line": 2
+        }
+      },
+      "sourceRefs": [
+        "settings-profile.html:2"
+      ],
+      "relation": "unrelated",
+      "rationale": "No supplied focus term appears in the changed label or source reference.",
+      "status": "todo",
+      "note": ""
+    },
+    {
+      "id": "edge:removed:screen|/settings -> /settings|Link: Notification settings",
+      "kind": "edge",
+      "change": "removed",
+      "label": "Transition removed: /settings → /settings · Link: Notification settings",
+      "evidence": {
+        "before": {
+          "file": "settings.html",
+          "line": 2
+        }
+      },
+      "sourceRefs": [
+        "settings.html:2"
+      ],
+      "relation": "unrelated",
+      "rationale": "No supplied focus term appears in the changed label or source reference.",
+      "status": "todo",
+      "note": ""
+    }
+  ],
+  "context": {
+    "unchangedScreens": [
+      {
+        "id": "screen:/",
+        "kind": "screen",
+        "label": "Unchanged screen: /",
+        "relation": "unchanged",
+        "sourceRefs": [
+          "index.html"
+        ]
+      },
+      {
+        "id": "screen:/customers",
+        "kind": "screen",
+        "label": "Unchanged screen: /customers",
+        "relation": "unchanged",
+        "sourceRefs": [
+          "customers.html"
+        ]
+      },
+      {
+        "id": "screen:/orders",
+        "kind": "screen",
+        "label": "Unchanged screen: /orders",
+        "relation": "unchanged",
+        "sourceRefs": [
+          "orders.html"
+        ]
+      },
+      {
+        "id": "screen:/settings",
+        "kind": "screen",
+        "label": "Unchanged screen: /settings",
+        "relation": "unchanged",
+        "sourceRefs": [
+          "settings.html"
+        ]
+      }
+    ],
+    "unchangedEdges": [
+      {
+        "id": "edge:screen|/ -> /customers|Link: Customers",
+        "kind": "edge",
+        "label": "Unchanged transition: / → /customers · Link: Customers",
+        "relation": "unchanged",
+        "sourceRefs": [
+          "index.html:3"
+        ]
+      },
+      {
+        "id": "edge:screen|/ -> /customers|Link: Open customers",
+        "kind": "edge",
+        "label": "Unchanged transition: / → /customers · Link: Open customers",
+        "relation": "unchanged",
+        "sourceRefs": [
+          "index.html:3"
+        ]
+      },
+      {
+        "id": "edge:screen|/ -> /settings|Link: Settings",
+        "kind": "edge",
+        "label": "Unchanged transition: / → /settings · Link: Settings",
+        "relation": "unchanged",
+        "sourceRefs": [
+          "index.html:3"
+        ]
+      },
+      {
+        "id": "edge:screen|/ -> /|Link: Dashboard",
+        "kind": "edge",
+        "label": "Unchanged transition: / → / · Link: Dashboard",
+        "relation": "unchanged",
+        "sourceRefs": [
+          "index.html:3"
+        ]
+      },
+      {
+        "id": "edge:screen|/customers -> /orders|Link: Acme Retail · 3 open orders",
+        "kind": "edge",
+        "label": "Unchanged transition: /customers → /orders · Link: Acme Retail · 3 open orders",
+        "relation": "unchanged",
+        "sourceRefs": [
+          "customers.html:2"
+        ]
+      },
+      {
+        "id": "edge:screen|/customers -> /settings|Link: Settings",
+        "kind": "edge",
+        "label": "Unchanged transition: /customers → /settings · Link: Settings",
+        "relation": "unchanged",
+        "sourceRefs": [
+          "customers.html:2"
+        ]
+      },
+      {
+        "id": "edge:screen|/customers -> /|Link: Dashboard",
+        "kind": "edge",
+        "label": "Unchanged transition: /customers → / · Link: Dashboard",
+        "relation": "unchanged",
+        "sourceRefs": [
+          "customers.html:2"
+        ]
+      },
+      {
+        "id": "edge:screen|/orders -> /customers|Link: Customers",
+        "kind": "edge",
+        "label": "Unchanged transition: /orders → /customers · Link: Customers",
+        "relation": "unchanged",
+        "sourceRefs": [
+          "orders.html:2"
+        ]
+      },
+      {
+        "id": "edge:screen|/orders -> /settings|Link: Settings",
+        "kind": "edge",
+        "label": "Unchanged transition: /orders → /settings · Link: Settings",
+        "relation": "unchanged",
+        "sourceRefs": [
+          "orders.html:2"
+        ]
+      },
+      {
+        "id": "edge:screen|/orders -> /|Link: Dashboard",
+        "kind": "edge",
+        "label": "Unchanged transition: /orders → / · Link: Dashboard",
+        "relation": "unchanged",
+        "sourceRefs": [
+          "orders.html:2"
+        ]
+      },
+      {
+        "id": "edge:screen|/settings -> /customers|Link: Customers",
+        "kind": "edge",
+        "label": "Unchanged transition: /settings → /customers · Link: Customers",
+        "relation": "unchanged",
+        "sourceRefs": [
+          "settings.html:2"
+        ]
+      },
+      {
+        "id": "edge:screen|/settings -> /|Link: Dashboard",
+        "kind": "edge",
+        "label": "Unchanged transition: /settings → / · Link: Dashboard",
+        "relation": "unchanged",
+        "sourceRefs": [
+          "settings.html:2"
+        ]
+      }
+    ]
+  },
+  "limitations": [
+    "Impact relation is a deterministic focus-term match over graph labels and source paths; it is not an AI judgment.",
+    "A changed graph edge proves a parser-visible relationship, not that the product behavior is correct.",
+    "Browser capture and runtime semantics require a separately running target app; this pack does not analyze GitHub online."
+  ]
+}

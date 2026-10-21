@@ -1,0 +1,44 @@
+import type { ReviewPack } from "./review-pack.js";
+
+const escapeHtml = (value: string): string => value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+const escapeScriptJson = (value: string): string => value.replace(/</g, "\\u003c").replace(/\u2028/g, "\\u2028").replace(/\u2029/g, "\\u2029");
+
+/** Self-contained offline reviewer. State remains in this browser and exports only the review JSON. */
+export function renderReviewPackHtml(pack: ReviewPack): string {
+  const data = escapeScriptJson(JSON.stringify(pack));
+  const product = escapeHtml(pack.product);
+  const limits = pack.limitations.map((limit) => `<li>${escapeHtml(limit)}</li>`).join("");
+  return `<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${product} · Review Pack</title>
+<style>
+:root{color-scheme:light;--bg:#f5f7fb;--panel:#fff;--ink:#18212f;--muted:#5c6b7d;--line:#dbe3ee;--blue:#1c67d2;--green:#157347;--amber:#a65a00;--purple:#6b42a1}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}.wrap{width:min(1100px,calc(100% - 32px));margin:auto}header{padding:42px 0 26px}h1{margin:8px 0;font-size:clamp(2rem,5vw,3.8rem);line-height:1.02;letter-spacing:-.04em}.eyebrow{color:var(--blue);font-weight:700;letter-spacing:.12em;text-transform:uppercase;font-size:.75rem}.lede{max-width:760px;color:var(--muted)}.sources{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0}.source{padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:var(--panel)}.source b{display:block;font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}.toolbar{position:sticky;top:0;z-index:2;display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:12px 0;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(8px)}button,.status{border:1px solid var(--line);border-radius:8px;background:var(--panel);padding:9px 12px;color:var(--ink);font:inherit}button{cursor:pointer}button.primary{border-color:var(--blue);background:var(--blue);color:#fff}.summary{margin-left:auto;color:var(--muted);font-size:.9rem}.grid{display:grid;gap:14px}.item,.context{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}.item{display:grid;grid-template-columns:1fr 190px;gap:14px}.item h3{margin:0 0 6px;font-size:1rem}.meta{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}.badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:.75rem;font-weight:700;background:#e9eef6;color:var(--muted)}.badge.related{background:#d9f4e4;color:var(--green)}.badge.unrelated{background:#f0e9fa;color:var(--purple)}.badge.unknown{background:#fff1d5;color:var(--amber)}.badge.added{color:var(--green)}.badge.removed{color:#a52a2a}.badge.changed{color:var(--amber)}.rationale,.refs,.limits{color:var(--muted);font-size:.88rem}.refs code{display:inline-block;margin:2px 4px 0 0;padding:2px 5px;border-radius:5px;background:#eef2f7}.controls{display:grid;gap:8px;align-content:start}.controls label{font-size:.78rem;color:var(--muted);font-weight:700}.controls select,.controls textarea{width:100%;padding:8px;border:1px solid var(--line);border-radius:8px;font:inherit;background:#fff;color:var(--ink)}textarea{min-height:76px;resize:vertical}.context{color:var(--muted)}.context ul{margin:8px 0 0;padding-left:20px}.limits{padding:14px 16px;border-left:3px solid var(--amber);background:#fff8e8;margin:24px 0 42px}.empty{padding:22px;border:1px dashed var(--line);border-radius:12px;color:var(--muted)}@media(max-width:700px){.item{grid-template-columns:1fr}.summary{margin-left:0;width:100%}}
+</style></head><body><header class="wrap"><div class="eyebrow">Code2Flow Review Pack · local/offline</div><h1>${product} changed flow review</h1><p class="lede">A reviewer-owned checklist generated from two parser graph revisions. Relation badges only report deterministic focus-term matches; confirm behavior in the running app before marking an item verified.</p><div class="sources"><div class="source"><b>Before</b>${escapeHtml(pack.source.before.label)} · ${escapeHtml(pack.source.before.ref)}</div><div class="source"><b>After</b>${escapeHtml(pack.source.after.label)} · ${escapeHtml(pack.source.after.ref)}</div><div class="source"><b>Focus</b>${pack.focusTerms.length ? pack.focusTerms.map(escapeHtml).join(", ") : "none supplied"}</div></div></header><main class="wrap"><div class="toolbar"><button class="primary" id="export">Export review JSON</button><button id="reset">Reset local review state</button><span class="summary" id="summary"></span></div><section><h2>Changed evidence</h2><div class="grid" id="items"></div></section><section class="context"><h2>Unchanged context</h2><p>These screens and transitions exist in both revisions. They are shown for boundary checking and are not review items.</p><div id="context-list"></div></section><div class="limits"><strong>Limits</strong><ul>${limits}</ul></div></main><script id="review-data" type="application/json">${data}</script><script>
+(() => {
+  const seed = JSON.parse(document.getElementById('review-data').textContent);
+  const key = 'code2flow-review:' + seed.product + ':' + seed.source.before.ref + ':' + seed.source.after.ref;
+  const saved = (() => { try { return JSON.parse(localStorage.getItem(key) || 'null'); } catch { return null; } })();
+  const state = saved && Array.isArray(saved.items) ? saved : { ...seed, items: seed.items.map(item => ({ ...item })) };
+  const esc = value => String(value).replace(/[&<>\"]/g, char => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '\"':'&quot;' }[char]));
+  const persist = () => localStorage.setItem(key, JSON.stringify({ ...state, items: state.items }));
+  const refs = item => item.sourceRefs.length ? item.sourceRefs.map(ref => '<code>' + esc(ref) + '</code>').join(' ') : 'No source ref recorded';
+  const render = () => {
+    const root = document.getElementById('items'); root.replaceChildren();
+    if (!state.items.length) root.innerHTML = '<div class="empty">No graph changes were found for these revisions.</div>';
+    state.items.forEach((item, index) => {
+      const article = document.createElement('article'); article.className = 'item'; article.dataset.reviewId = item.id;
+      article.innerHTML = '<div><h3>' + esc(item.label) + '</h3><div class="meta"><span class="badge ' + esc(item.relation) + '">' + esc(item.relation) + '</span><span class="badge ' + esc(item.change) + '">' + esc(item.change) + '</span><span class="badge">' + esc(item.kind) + '</span></div><p class="rationale">' + esc(item.rationale) + '</p><div class="refs">Evidence: ' + refs(item) + '</div></div><div class="controls"><label>Status<select data-field="status"><option value="todo">Todo</option><option value="in-review">In review</option><option value="verified">Verified</option></select></label><label>Reviewer note<textarea data-field="note" placeholder="What did you check?"></textarea></label></div>';
+      article.querySelector('[data-field="status"]').value = item.status; article.querySelector('[data-field="note"]').value = item.note;
+      article.querySelector('[data-field="status"]').addEventListener('change', event => { state.items[index].status = event.target.value; persist(); updateSummary(); });
+      article.querySelector('[data-field="note"]').addEventListener('input', event => { state.items[index].note = event.target.value; persist(); });
+      root.appendChild(article);
+    });
+    const ctx = document.getElementById('context-list'); const all = [...state.context.unchangedScreens, ...state.context.unchangedEdges]; ctx.innerHTML = all.length ? '<ul>' + all.map(item => '<li><code>' + esc(item.kind) + '</code> ' + esc(item.label) + '</li>').join('') + '</ul>' : '<div class="empty">No unchanged context was found.</div>'; updateSummary();
+  };
+  const updateSummary = () => { const counts = state.items.reduce((out, item) => { out[item.status] = (out[item.status] || 0) + 1; return out; }, {}); document.getElementById('summary').textContent = state.items.length + ' changed item(s) · ' + (counts.todo || 0) + ' todo · ' + (counts['in-review'] || 0) + ' in review · ' + (counts.verified || 0) + ' verified'; };
+  document.getElementById('reset').addEventListener('click', () => { localStorage.removeItem(key); location.reload(); });
+  document.getElementById('export').addEventListener('click', () => { const blob = new Blob([JSON.stringify({ ...state, exportedAt: new Date().toISOString() }, null, 2) + '\\n'], { type: 'application/json' }); const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = seed.product + '-review.json'; link.click(); setTimeout(() => URL.revokeObjectURL(link.href), 1000); });
+  window.__CODE2FLOW_REVIEW = state; render();
+})();</script></body></html>`;
+}

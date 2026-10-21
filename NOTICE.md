@@ -7,7 +7,10 @@ copyright and full MIT terms remain in [`LICENSE`](LICENSE).
 
 ## DevAngular333 contribution
 
-The fork/account repository adds [`scripts/smoke.mjs`](scripts/smoke.mjs), a
-tracked synthetic fixture invocation and [`docs/case-study.md`](docs/case-study.md).
-The smoke command builds the viewer, scans a copied static HTML fixture and
-exports a self-contained HTML flow map in a temporary directory.
+The account repository adds the local **Review Pack** workflow in
+[`src/review/`](src/review/), the `review` CLI command, a labeled synthetic CRM
+revision pair, [`scripts/smoke.mjs`](scripts/smoke.mjs), and
+[`docs/case-study.md`](docs/case-study.md). Review Pack state stays in the
+reviewer's browser and can be exported as JSON; it does not upload target-repo
+files. The smoke command builds the viewer, scans a copied static HTML fixture
+and exports a self-contained HTML flow map in a temporary directory.

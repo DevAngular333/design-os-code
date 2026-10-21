@@ -12,21 +12,29 @@ What you see: Node reports a version beginning with `v20` or later, and Chrome i
 
 If it fails: install Node 20+ and Google Chrome, then make sure the app starts locally with its usual development command before continuing.
 
-## 1. Install Code2Flow
+## 1. Install the DevAngular333 checkout
 
 ```bash
-npm i -g design-os-code2flow
-code2flow
+git clone --branch v0.5.0-devangular333 https://github.com/DevAngular333/design-os-code.git
+cd design-os-code
+npm ci
+npm run build
+node dist/cli/index.js --help
 ```
 
-What you see: a list of `scan`, `init`, `run`, `paths`, `snapshot`, `login`, `serve`, `export`, `render`, `stories`, `lint`, and `diff`.
+This is the DevAngular333 repository and release path. It is not published as an
+npm package under the upstream name. The commands below use the built CLI at
+`/path/to/design-os-code/dist/cli/index.js`; replace that path with the checkout
+you just cloned.
+
+What you see: a list of `scan`, `init`, `run`, `paths`, `snapshot`, `login`, `serve`, `export`, `render`, `stories`, `lint`, `diff`, and `review`.
 
 If it fails: confirm that `npm` is on your PATH and rerun after installing Node 20+.
 
 ## 2. Set up the app folder
 
 ```bash
-code2flow init /path/to/your-app
+node /path/to/design-os-code/dist/cli/index.js init /path/to/your-app
 ```
 
 What you see: Code2Flow creates or keeps `code2flow.config.json`, adds `.code2flow/` to `.gitignore`, adds a Code2Flow section to `AGENTS.md` or `CLAUDE.md`, and copies the three agent skills unless you choose `--no-skills`. The config records the app's local server URL; the viewer itself always uses `127.0.0.1:4317`.
@@ -36,7 +44,7 @@ If it fails: check that the path is the app root and that you can write there. R
 ## 3. Create the first Flow Canvas
 
 ```bash
-code2flow run /path/to/your-app
+node /path/to/design-os-code/dist/cli/index.js run /path/to/your-app
 ```
 
 What you see: one summary line with Screen Nodes, User Flow Edges, captures, failed captures, and lint errors. The command scans, captures, validates a Story Manifest when present, lints, writes an offline export, and stops the server it started. It also writes `.code2flow/run-summary.json`.
@@ -56,7 +64,7 @@ Exit codes:
 If your app is already running, use its exact URL instead of starting another server:
 
 ```bash
-code2flow run /path/to/your-app --url http://127.0.0.1:3000
+node /path/to/design-os-code/dist/cli/index.js run /path/to/your-app --url http://127.0.0.1:3000
 ```
 
 If it fails: do not choose another port automatically. Start the app at the configured URL, or update `serverUrl` and `devCommand` in [the configuration reference](config-reference.md).
@@ -64,12 +72,12 @@ If it fails: do not choose another port automatically. Start the app at the conf
 ## 4. Explore the viewer
 
 ```bash
-code2flow serve /path/to/your-app
+node /path/to/design-os-code/dist/cli/index.js serve /path/to/your-app
 ```
 
 What you see: a local viewer at `http://127.0.0.1:4317`. Leave this terminal running while you explore; press `Ctrl+C` when you are done.
 
-If it fails: run `code2flow run /path/to/your-app` or `code2flow scan /path/to/your-app` first so `.code2flow/graph.json` exists. If port 4317 is in use, stop the process using it; Code2Flow does not select a different viewer port.
+If it fails: run `node /path/to/design-os-code/dist/cli/index.js run /path/to/your-app` or `node /path/to/design-os-code/dist/cli/index.js scan /path/to/your-app` first so `.code2flow/graph.json` exists. If port 4317 is in use, stop the process using it; Code2Flow does not select a different viewer port.
 
 ### Start at the product map
 
@@ -185,17 +193,17 @@ If a control is unclear: hover its icon for a tooltip, or use the help button on
 First create a graph, then scaffold a prompt pack from your PRD:
 
 ```bash
-code2flow stories scaffold /path/to/your-app docs/prd/checkout.md
+node /path/to/design-os-code/dist/cli/index.js stories scaffold /path/to/your-app docs/prd/checkout.md
 ```
 
 What you see: `.code2flow/stories-prompt.md`, containing the PRD text, allowed Screen Node ids, and the Story Manifest shape.
 
-If it fails: run `code2flow scan /path/to/your-app` first, and give the full path to the PRD file.
+If it fails: run `node /path/to/design-os-code/dist/cli/index.js scan /path/to/your-app` first, and give the full path to the PRD file.
 
 Give the generated prompt pack to your coding agent with the installed `code2flow-stories-from-prd` skill. The agent writes `code2flow.stories.json`; then validate its claims against the graph:
 
 ```bash
-code2flow stories validate /path/to/your-app
+node /path/to/design-os-code/dist/cli/index.js stories validate /path/to/your-app
 ```
 
 What you see: unknown Screen Nodes and PRD transitions not detected in code. These are drift signals to review, not details Code2Flow silently removes.
@@ -205,9 +213,9 @@ If it fails: fix malformed JSON or the reported manifest structure, then validat
 ## 6. Ask path questions
 
 ```bash
-code2flow paths /path/to/your-app --from / --to "/docs/[...parts]"
-code2flow paths /path/to/your-app --orphans
-code2flow paths /path/to/your-app --dead-ends
+node /path/to/design-os-code/dist/cli/index.js paths /path/to/your-app --from / --to "/docs/[...parts]"
+node /path/to/design-os-code/dist/cli/index.js paths /path/to/your-app --orphans
+node /path/to/design-os-code/dist/cli/index.js paths /path/to/your-app --dead-ends
 ```
 
 What you see: the shortest source-evidenced path, or screens that nothing reaches / that lead nowhere. Each path hop includes its Action Trigger, Transition Confidence, and `file:line` evidence.
@@ -217,13 +225,13 @@ If it fails: copy the exact Screen Node id from the graph or viewer. Use `--shel
 ## 7. Make hand-outs
 
 ```bash
-code2flow export /path/to/your-app
-code2flow render /path/to/your-app --png --pdf
+node /path/to/design-os-code/dist/cli/index.js export /path/to/your-app
+node /path/to/design-os-code/dist/cli/index.js render /path/to/your-app --png --pdf
 ```
 
 What you see: `export` writes a self-contained HTML file that opens offline. `render` writes PNGs for the product map, features, and stories plus a PDF hand-out.
 
-If it fails: run `code2flow run /path/to/your-app` first. Use `--feature`, `--story`, `--out`, or `--scale` to narrow a render. When a whole-app export would exceed 14 MB, Code2Flow splits screenshots into one HTML file per feature; each file still carries the full graph.
+If it fails: run `node /path/to/design-os-code/dist/cli/index.js run /path/to/your-app` first. Use `--feature`, `--story`, `--out`, or `--scale` to narrow a render. When a whole-app export would exceed 14 MB, Code2Flow splits screenshots into one HTML file per feature; each file still carries the full graph.
 
 ## 8. Sign in for an app behind authentication
 
@@ -235,8 +243,8 @@ Put the test account in environment variables (never in the repo) and tell Code2
 
 ```bash
 export MYAPP_EMAIL="…" MYAPP_PASSWORD="…"
-code2flow run /path/to/your-app          # signs in headless before capturing; summary shows `login: ok`
-code2flow login /path/to/your-app --url http://127.0.0.1:3000   # the same sign-in on its own
+node /path/to/design-os-code/dist/cli/index.js run /path/to/your-app          # signs in headless before capturing; summary shows `login: ok`
+node /path/to/design-os-code/dist/cli/index.js login /path/to/your-app --url http://127.0.0.1:3000   # the same sign-in on its own
 ```
 
 What you see: `login: ok` in the run summary and `.code2flow/storage-state.json` saved; later runs reuse it (`--relogin` forces a new sign-in). Code2Flow finds the email field, the password field and the submit button itself; set `login.selectors` when the form is unusual. Values are read from the environment at run time and are never written to the config, the graph, the export or the logs.

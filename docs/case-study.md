@@ -9,18 +9,39 @@ that produced it.
 
 ## DevAngular333 contribution
 
-This repository keeps the local parser/viewer product and adds a reproducible
-offline smoke path in [`scripts/smoke.mjs`](../scripts/smoke.mjs). It copies the
-tracked synthetic static site to a temporary directory, runs the real CLI scan,
-reads the generated canonical graph, exports the real self-contained HTML viewer,
-and checks that the result contains screens, edges and the Code2Flow viewer.
+This repository keeps the local parser/viewer product and adds a **Review Pack**
+workflow plus a reproducible offline smoke path. Review Pack consumes two
+canonical graph revisions, classifies changed screens/transitions with explicit
+focus terms, preserves `file:line` source refs, and exports a self-contained
+HTML checklist. A reviewer owns the final status and note for each item; the
+tool does not call an AI model or claim runtime impact.
+
+The sample app in [`fixtures/review-pack/README.md`](../fixtures/review-pack/README.md)
+has two labeled synthetic revisions. Version 2 adds an order-status review path
+and an unrelated profile-settings path. Running the CLI with `--focus order,status`
+marks only the parser-visible order path as related; unchanged screens and edges
+remain in the report for boundary checking.
+
+The original DevAngular333 contribution also includes a smoke path in
+[`scripts/smoke.mjs`](../scripts/smoke.mjs). It copies the tracked synthetic
+static site to a temporary directory, runs the real CLI scan, reads the generated
+canonical graph, exports the real self-contained HTML viewer, and checks that the
+result contains screens, edges and the Code2Flow viewer.
 
 ```bash
 npm ci
 npm run smoke
 ```
 
-Expected output has the form:
+Expected Review Pack output has the form:
+
+```text
+review  10 changed item(s), 4 unchanged screen(s), 12 unchanged edge(s)
+review  .../review-pack.html
+review  .../review-pack.json
+```
+
+Expected smoke output has the form:
 
 ```json
 {"status":"PASS","adapter":"Static HTML","screens":8,"edges":13,"export":"input-flows.html"}

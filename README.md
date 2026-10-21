@@ -2,6 +2,37 @@
 
 Turn a web codebase into a local, evidence-backed Flow Canvas your product team can explore. Every screen is a real screenshot, every arrow is an action found in the code with `file:line` evidence and a confidence tier. Nothing leaves your machine.
 
+## DevAngular333 Review Pack
+
+This release adds a reviewer workflow for a concrete question: **which screens
+and transitions changed, and what should a person check in the running app?**
+Give the CLI two graph revisions and optional focus terms. It writes a
+self-contained HTML checklist plus JSON. Reviewers can mark each item `todo`,
+`in-review`, or `verified`, add a note, and export the current review state.
+
+```bash
+npm ci
+npm run build
+npm run cli -- scan fixtures/review-pack/crm-v1
+npm run cli -- scan fixtures/review-pack/crm-v2
+npm run cli -- review fixtures/review-pack/crm-v2 \
+  --from fixtures/review-pack/crm-v1/.code2flow/graph.json \
+  --focus order,status \
+  --before-label 'CRM v1 · synthetic' \
+  --after-label 'CRM v2 · synthetic' \
+  --before-ref fixtures/review-pack/crm-v1 \
+  --after-ref fixtures/review-pack/crm-v2 \
+  --out /tmp/code2flow-review
+open /tmp/code2flow-review/review-pack.html
+```
+
+Try the [public interactive Review Pack demo](https://devangular333.github.io/devangular333-portfolio/review-pack-demo.html)
+before installing. It uses the included **synthetic** CRM revisions: the new
+order-status path is related to the focus terms, while a profile-settings
+change stays unrelated. The browser report is local-only; it does not inspect
+GitHub or upload target-repo files. The [sample app](fixtures/review-pack/README.md)
+is a separate running-app check for the order-status button.
+
 ## DevAngular333 verified path
 
 This public MIT repository adds a reproducible offline smoke command:
@@ -19,26 +50,33 @@ not claim screenshots or browser capture for an arbitrary target app. See the
 
 Supported today: Next.js App Router, React Router (v6/v7), static HTML folders — see [adapters](docs/adapters.md).
 
-![Flow canvas](https://raw.githubusercontent.com/jangtrinh/design-os-code2flow/main/docs/assets/feature-inspect.png)
+![Flow canvas](docs/assets/feature-inspect.png)
 
 ## Install
 
 ```bash
-npm i -g design-os-code2flow
-code2flow
+git clone https://github.com/DevAngular333/design-os-code.git
+cd design-os-code
+npm ci
+npm run build
+node dist/cli/index.js --help
 ```
+
+This is the DevAngular333 repository and release path. The upstream project is
+credited in [`NOTICE.md`](NOTICE.md); no npm package is published from this
+namespace.
 
 Node 20+, Google Chrome, and the target app's development server are required.
 
 ## Quick start
 
 ```bash
-code2flow init  /path/to/your-app    # config, .gitignore, AGENTS.md section, agent skills
-code2flow run   /path/to/your-app    # dev server → scan → screenshots → lint → offline export
-code2flow serve /path/to/your-app    # http://127.0.0.1:4317
+node dist/cli/index.js init  /path/to/your-app    # config, .gitignore, AGENTS.md section, agent skills
+node dist/cli/index.js run   /path/to/your-app    # dev server → scan → screenshots → lint → offline export
+node dist/cli/index.js serve /path/to/your-app    # http://127.0.0.1:4317
 ```
 
-![Terminal run](https://raw.githubusercontent.com/jangtrinh/design-os-code2flow/main/docs/assets/terminal-run.gif)
+![Terminal run](docs/assets/terminal-run.gif)
 
 Start with the **[user guide](docs/user-guide.md)** — install to hand-outs, step by step.
 
@@ -46,23 +84,23 @@ Start with the **[user guide](docs/user-guide.md)** — install to hand-outs, st
 
 **See the product map first.** Features and the transitions between them, before any single flow.
 
-![Product map](https://raw.githubusercontent.com/jangtrinh/design-os-code2flow/main/docs/assets/product-map.png)
+![Product map](docs/assets/product-map.png)
 
 **Inspect what the code found.** Click a screen or an edge pill: trigger, target, confidence, `file:line` evidence.
 
-![Inspector panel](https://raw.githubusercontent.com/jangtrinh/design-os-code2flow/main/docs/assets/inspector-edge.png)
+![Inspector panel](docs/assets/inspector-edge.png)
 
 **Recognize UI states.** Modals, tabs, drawers, dropdowns and hover overlays are frames of their own, on a tinted container next to their page.
 
-![State Screens](https://raw.githubusercontent.com/jangtrinh/design-os-code2flow/main/docs/assets/state-frames.png)
+![State Screens](docs/assets/state-frames.png)
 
 **Present one story at a time.** A clean lane per story, keyboard stepping, both sidebars out of the way.
 
-![Present lane](https://raw.githubusercontent.com/jangtrinh/design-os-code2flow/main/docs/assets/present-lane.png)
+![Present lane](docs/assets/present-lane.png)
 
 **Play every step.** Grid view shows every screenshot of a story in order; click a card to open the Stage on that step.
 
-![Play gallery](https://raw.githubusercontent.com/jangtrinh/design-os-code2flow/main/docs/assets/play-gallery.png)
+![Play gallery](docs/assets/play-gallery.png)
 
 **Present live.** The Stage shows one story step at audience scale: the running app itself (view only, `E` to take control) when `serve` finds it on this machine, the captured screen otherwise and in every export. Captions, presenter notes (`N`), audience names and languages (`L`) come from the Story Manifest. One optional line in the app keeps stepping free of page reloads:
 
@@ -71,11 +109,11 @@ import { installStageBridge } from "design-os-code2flow/stage-bridge";
 if (import.meta.env.DEV) installStageBridge({ navigate: (path) => router.navigate(path) });
 ```
 
-![Stage](https://raw.githubusercontent.com/jangtrinh/design-os-code2flow/main/docs/assets/stage-live.png)
+![Stage](docs/assets/stage-live.png)
 
 **Keep the legend close.** The left rail holds features, stories and the arrow legend; every canvas icon explains itself on hover.
 
-![Rail legend](https://raw.githubusercontent.com/jangtrinh/design-os-code2flow/main/docs/assets/rail-legend.png)
+![Rail legend](docs/assets/rail-legend.png)
 
 ## Docs
 
