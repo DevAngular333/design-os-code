@@ -2,6 +2,21 @@
 
 Turn a web codebase into a local, evidence-backed Flow Canvas your product team can explore. Every screen is a real screenshot, every arrow is an action found in the code with `file:line` evidence and a confidence tier. Nothing leaves your machine.
 
+## DevAngular333 verified path
+
+This public MIT repository adds a reproducible offline smoke command:
+
+```bash
+npm ci
+npm run smoke
+```
+
+The command builds the viewer, scans a copied synthetic static HTML fixture with
+the real CLI, checks the canonical graph, and exports a self-contained HTML flow
+map in a temporary directory. It proves parser/export behavior only; it does
+not claim screenshots or browser capture for an arbitrary target app. See the
+[case study](docs/case-study.md) and [attribution](NOTICE.md).
+
 Supported today: Next.js App Router, React Router (v6/v7), static HTML folders — see [adapters](docs/adapters.md).
 
 ![Flow canvas](https://raw.githubusercontent.com/jangtrinh/design-os-code2flow/main/docs/assets/feature-inspect.png)
