@@ -29,4 +29,17 @@ describe("Review Pack", () => {
     expect(html).toContain("id=\"review-data\"");
     expect(html).toContain("localStorage");
   });
+
+  it("keeps a fresh seed authoritative while restoring matching reviewer fields", () => {
+    const before = graph(["/"], []);
+    const first = buildReviewPack(before, graph(["/", "/orders"], [{ source: "/", target: "/orders", trigger: "Link: Orders", file: "orders.html" }]), { product: "crm", before: { label: "v1", ref: "before" }, after: { label: "v2", ref: "after" }, focusTerms: ["orders"] });
+    const second = buildReviewPack(before, graph(["/", "/orders", "/profile"], [
+      { source: "/", target: "/orders", trigger: "Link: Orders", file: "orders.html" },
+      { source: "/", target: "/profile", trigger: "Link: Profile", file: "profile.html" },
+    ]), { product: "crm", before: { label: "v1", ref: "before" }, after: { label: "v3", ref: "after" }, focusTerms: ["orders"] });
+    const html = renderReviewPackHtml(second);
+    expect(html).toContain("savedByFingerprint");
+    expect(second.items.some((item) => item.label.includes("/profile"))).toBe(true);
+    expect(first.items[0].id).not.toBe(second.items.find((item) => item.label.includes("/profile"))?.id);
+  });
 });

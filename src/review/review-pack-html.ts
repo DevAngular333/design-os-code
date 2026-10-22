@@ -19,7 +19,15 @@ export function renderReviewPackHtml(pack: ReviewPack): string {
   const seed = JSON.parse(document.getElementById('review-data').textContent);
   const key = 'code2flow-review:' + seed.product + ':' + seed.source.before.ref + ':' + seed.source.after.ref;
   const saved = (() => { try { return JSON.parse(localStorage.getItem(key) || 'null'); } catch { return null; } })();
-  const state = saved && Array.isArray(saved.items) ? saved : { ...seed, items: seed.items.map(item => ({ ...item })) };
+  // The report seed is authoritative. Restore only reviewer-owned fields for an
+  // item whose evidence fingerprint is unchanged; this keeps newly discovered
+  // items visible and prevents a verified state from crossing changed evidence.
+  const fingerprint = item => JSON.stringify({ id: item.id, kind: item.kind, change: item.change, evidence: item.evidence, sourceRefs: item.sourceRefs });
+  const savedByFingerprint = new Map(saved && Array.isArray(saved.items) ? saved.items.map(item => [fingerprint(item), item]) : []);
+  const state = { ...seed, items: seed.items.map(item => {
+    const prior = savedByFingerprint.get(fingerprint(item));
+    return prior ? { ...item, status: prior.status, note: prior.note } : { ...item };
+  }) };
   const esc = value => String(value).replace(/[&<>\"]/g, char => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '\"':'&quot;' }[char]));
   const persist = () => localStorage.setItem(key, JSON.stringify({ ...state, items: state.items }));
   const refs = item => item.sourceRefs.length ? item.sourceRefs.map(ref => '<code>' + esc(ref) + '</code>').join(' ') : 'No source ref recorded';
