@@ -4,6 +4,10 @@ Turn a web codebase into a local, evidence-backed Flow Canvas your product team 
 
 ## DevAngular333 Review Pack
 
+[![Review Pack preview](docs/assets/code2flow-review-pack-preview.gif)](https://devangular333.github.io/devangular333-portfolio/#review-pack-video)
+
+Watch the [58-second product video](https://github.com/DevAngular333/design-os-code/releases/download/v0.5.1-devangular333/code2flow-review-pack-launch-1080p.mp4) or open the [interactive demo](https://devangular333.github.io/devangular333-portfolio/review-pack-demo.html). The [poster](docs/assets/code2flow-review-pack-poster.png) remains available when a Markdown viewer does not play GIF/MP4 inline.
+
 This release adds a reviewer workflow for a concrete question: **which screens
 and transitions changed, and what should a person check in the running app?**
 Give the CLI two graph revisions and optional focus terms. It writes a
