@@ -186,6 +186,9 @@ async function captureFootage(browser, reportUrl, appUrl, metadata) {
   await shot("app-confirmed-vertical");
   await page.close();
   const exported = JSON.parse(await readFile(exportPath, "utf8"));
+  if (exported.items?.[0]?.status !== "verified" || exported.items?.[0]?.note !== "Checked the running CRM path") {
+    throw new Error("capture did not preserve the verified status and reviewer note");
+  }
   await writeFile(join(rawRoot, "capture-metadata.json"), JSON.stringify({ ...metadata, urls: { reportUrl, appUrl }, shots, exportedStatus: exported.items?.[0]?.status, exportedNote: exported.items?.[0]?.note }, null, 2) + "\n");
 }
 
