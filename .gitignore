@@ -51,3 +51,5 @@ fixtures/benchmarks/
 .code2flow-audit/
 .media-output/
 design/memory.events.*
+
+.media-output-*/
