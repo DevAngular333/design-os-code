@@ -66,10 +66,10 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/DevAngular333/design-os-code.git"
+    "url": "git+https://github.com/NamAIEngineer/design-os-code.git"
   },
-  "homepage": "https://devangular333.github.io/devangular333-portfolio/#code2flow",
+  "homepage": "https://namaiengineer.github.io/devangular333-portfolio/#code2flow",
   "bugs": {
-    "url": "https://github.com/DevAngular333/design-os-code/issues"
+    "url": "https://github.com/NamAIEngineer/design-os-code/issues"
   }
 }
