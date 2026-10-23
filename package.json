@@ -1,6 +1,6 @@
 {
   "name": "design-os-code2flow",
-  "version": "0.5.1-devangular333",
+  "version": "0.5.2-devangular333",
   "description": "DevAngular333 Code2Flow derivative with a local Review Pack for code-change flow review.",
   "type": "module",
   "engines": {
