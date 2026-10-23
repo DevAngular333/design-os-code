@@ -15,7 +15,7 @@ If it fails: install Node 20+ and Google Chrome, then make sure the app starts l
 ## 1. Install the DevAngular333 checkout
 
 ```bash
-git clone --branch v0.5.2-devangular333 https://github.com/NamAIEngineer/design-os-code.git
+git clone --branch v0.5.3-devangular333 https://github.com/NamAIEngineer/design-os-code.git
 cd design-os-code
 npm ci
 npm run build
