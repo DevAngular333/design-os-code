@@ -153,18 +153,33 @@ async function writeBrandAssets(browser) {
 async function captureFootage(browser, reportUrl, appUrl, metadata) {
   const page = await browser.newPage({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 });
   const shots = {};
+  const series = {};
   const shot = async (name, fullPage = false) => {
     const path = join(rawRoot, `${name}.png`);
     await page.screenshot({ path, fullPage });
     shots[name] = relative(outputRoot, path);
   };
+  const seriesShot = async (name, fullPage = false) => {
+    const index = series[name]?.length || 0;
+    const path = join(rawRoot, `${name}-${String(index).padStart(2, "0")}.png`);
+    await page.screenshot({ path, fullPage });
+    series[name] = [...(series[name] || []), relative(outputRoot, path)];
+  };
   await page.goto(reportUrl, { waitUntil: "networkidle" });
   await page.evaluate(() => localStorage.clear());
   await page.reload({ waitUntil: "networkidle" });
   await shot("report-initial");
+  await seriesShot("report-flow");
   const firstStatus = page.locator("select[data-field=status]").first();
   await firstStatus.selectOption("verified");
-  await page.locator("textarea[data-field=note]").first().fill("Checked the running CRM path");
+  await seriesShot("report-flow");
+  const note = "Checked the running CRM path";
+  const noteField = page.locator("textarea[data-field=note]").first();
+  for (const length of [7, 15, note.length]) {
+    await noteField.fill(note.slice(0, length));
+    await seriesShot("report-flow");
+  }
+  await page.waitForTimeout(250);
   await shot("report-reviewed");
   const downloadPromise = page.waitForEvent("download");
   await page.locator("#export").click();
@@ -174,13 +189,18 @@ async function captureFootage(browser, reportUrl, appUrl, metadata) {
   shots.exportedReview = relative(outputRoot, exportPath);
   await page.goto(appUrl, { waitUntil: "networkidle" });
   await shot("app-dashboard");
+  await seriesShot("app-flow");
   await page.getByRole("link", { name: "Customers" }).first().click();
   await page.waitForLoadState("networkidle");
   await shot("app-customers");
+  await seriesShot("app-flow");
   await page.getByRole("link", { name: "Review order status" }).click();
   await page.waitForLoadState("networkidle");
   await shot("app-status");
+  await seriesShot("app-flow");
   await page.getByRole("button", { name: "Mark status reviewed" }).click();
+  await page.waitForTimeout(350);
+  await seriesShot("app-flow");
   await shot("app-confirmed");
   await page.setViewportSize({ width: 900, height: 1200 });
   await shot("app-confirmed-vertical");
@@ -189,7 +209,7 @@ async function captureFootage(browser, reportUrl, appUrl, metadata) {
   if (exported.items?.[0]?.status !== "verified" || exported.items?.[0]?.note !== "Checked the running CRM path") {
     throw new Error("capture did not preserve the verified status and reviewer note");
   }
-  await writeFile(join(rawRoot, "capture-metadata.json"), JSON.stringify({ ...metadata, urls: { reportUrl, appUrl }, shots, exportedStatus: exported.items?.[0]?.status, exportedNote: exported.items?.[0]?.note }, null, 2) + "\n");
+  await writeFile(join(rawRoot, "capture-metadata.json"), JSON.stringify({ ...metadata, urls: { reportUrl, appUrl }, shots, series, exportedStatus: exported.items?.[0]?.status, exportedNote: exported.items?.[0]?.note }, null, 2) + "\n");
 }
 
 function dataUrl(buffer, type) {
@@ -198,6 +218,10 @@ function dataUrl(buffer, type) {
 
 async function stageHtml() {
   const readImage = async (name) => dataUrl(await readFile(join(rawRoot, name)), "image/png");
+  const readSeries = async (prefix) => {
+    const files = (await readdir(rawRoot)).filter((name) => name.startsWith(`${prefix}-`) && name.endsWith(".png")).sort();
+    return Promise.all(files.map(readImage));
+  };
   const images = {
     report: await readImage("report-initial.png"),
     reviewed: await readImage("report-reviewed.png"),
@@ -207,8 +231,10 @@ async function stageHtml() {
     confirmed: await readImage("app-confirmed.png"),
     confirmedVertical: await readImage("app-confirmed-vertical.png"),
     cover: dataUrl(await readFile(join(assetRoot, "code2flow-review-pack-cover.png")), "image/png"),
+    reportFlow: await readSeries("report-flow"),
+    appFlow: await readSeries("app-flow"),
   };
-  return `<!doctype html><html><head><meta charset="utf-8"><style>*{box-sizing:border-box}html,body{margin:0;background:#0B1020;color:#F4F7FB;font-family:Arial,Helvetica,sans-serif}#stage{position:relative;overflow:hidden;width:100vw;height:100vh;background:linear-gradient(145deg,#0B1020,#101A2B 58%,#111D22)}#brand{position:absolute;z-index:5;top:56px;left:74px;color:#6EE7F9;font:700 19px Menlo,monospace;letter-spacing:4px}#brand span{color:#9FB0C8;font-weight:400;letter-spacing:1px;font-size:13px;margin-left:18px}.scene{position:absolute;inset:150px 74px 220px;display:flex;align-items:center;justify-content:center}.scene img{max-width:100%;max-height:100%;object-fit:contain;border:1px solid #2C4058;border-radius:18px;box-shadow:0 22px 80px #0008}.caption{position:absolute;z-index:4;left:74px;right:74px;bottom:72px}.kicker{color:#C7F36B;font:700 17px Menlo,monospace;letter-spacing:3px;text-transform:uppercase}.caption h1{margin:13px 0 0;font-size:54px;line-height:1.02;letter-spacing:-2px}.caption p{margin:12px 0 0;color:#B9C6D8;font-size:22px}.footer{position:absolute;z-index:4;right:74px;bottom:42px;color:#6F8098;font:14px Menlo,monospace}.stage-vertical #brand{top:42px;left:42px;font-size:15px;letter-spacing:2px}.stage-vertical .scene{inset:150px 42px 450px}.stage-vertical .caption{left:42px;right:42px;bottom:115px}.stage-vertical .caption h1{font-size:48px}.stage-vertical .caption p{font-size:21px}.stage-vertical .footer{left:42px;right:42px;bottom:65px;font-size:13px}.graph-wrap{width:100%;height:100%;display:flex;align-items:center;justify-content:center}.graph-wrap svg{width:100%;height:auto;border-radius:18px;box-shadow:0 22px 80px #0008}.json-card{width:min(1120px,100%);padding:40px;border:1px solid #2C4058;border-radius:18px;background:#101A2B;box-shadow:0 22px 80px #0008;font:20px/1.65 Menlo,monospace}.json-card .key{color:#6EE7F9}.json-card .value{color:#C7F36B}.json-card .note{color:#FFCC66}.stamp{display:inline-block;padding:8px 12px;border:1px solid #C7F36B;color:#C7F36B;border-radius:99px;font:700 15px Menlo,monospace;letter-spacing:2px;margin-bottom:22px}</style></head><body><div id="stage"><div id="brand">DEVANGULAR333 <span>CREATIVE ENGINEERING</span></div><div class="scene" id="scene"></div><div class="caption"><div class="kicker" id="kicker"></div><h1 id="title"></h1><p id="body"></p></div><div class="footer">CODE2FLOW REVIEW PACK · v0.5.1-devangular333</div></div><script>
+  return `<!doctype html><html><head><meta charset="utf-8"><style>*{box-sizing:border-box}html,body{margin:0;background:#0B1020;color:#F4F7FB;font-family:Arial,Helvetica,sans-serif}#stage{position:relative;overflow:hidden;width:100vw;height:100vh;background:linear-gradient(145deg,#0B1020,#101A2B 58%,#111D22)}#brand{position:absolute;z-index:5;top:56px;left:74px;color:#6EE7F9;font:700 19px Menlo,monospace;letter-spacing:4px}#brand span{color:#9FB0C8;font-weight:400;letter-spacing:1px;font-size:13px;margin-left:18px}.scene{position:absolute;inset:150px 74px 220px;display:flex;align-items:center;justify-content:center}.scene img{max-width:100%;max-height:100%;object-fit:contain;border:1px solid #2C4058;border-radius:18px;box-shadow:0 22px 80px #0008}.caption{position:absolute;z-index:4;left:74px;right:74px;bottom:72px}.kicker{color:#C7F36B;font:700 17px Menlo,monospace;letter-spacing:3px;text-transform:uppercase}.caption h1{margin:13px 0 0;font-size:54px;line-height:1.02;letter-spacing:-2px}.caption p{margin:12px 0 0;color:#B9C6D8;font-size:22px}.footer{position:absolute;z-index:4;right:74px;bottom:42px;color:#6F8098;font:14px Menlo,monospace}.stage-vertical #brand{top:42px;left:42px;font-size:15px;letter-spacing:2px}.stage-vertical .scene{inset:150px 42px 450px;overflow:hidden;align-items:flex-start}.scene img.ui-capture{width:135%;max-width:none;max-height:none;object-fit:cover;object-position:top left}.stage-vertical .scene img{width:1180px;max-width:none;height:auto;transform:translateX(0);object-fit:cover;object-position:top center}.stage-vertical .caption{left:42px;right:42px;bottom:115px}.stage-vertical .caption h1{font-size:48px}.stage-vertical .caption p{font-size:21px}.stage-vertical .footer{left:42px;right:42px;bottom:65px;font-size:13px}.graph-wrap{width:100%;height:100%;display:flex;align-items:center;justify-content:center}.graph-wrap svg{width:100%;height:auto;border-radius:18px;box-shadow:0 22px 80px #0008}.json-card{width:min(1120px,100%);padding:40px;border:1px solid #2C4058;border-radius:18px;background:#101A2B;box-shadow:0 22px 80px #0008;font:20px/1.65 Menlo,monospace}.json-card .key{color:#6EE7F9}.json-card .value{color:#C7F36B}.json-card .note{color:#FFCC66}.stamp{display:inline-block;padding:8px 12px;border:1px solid #C7F36B;color:#C7F36B;border-radius:99px;font:700 15px Menlo,monospace;letter-spacing:2px;margin-bottom:22px}</style></head><body><div id="stage"><div id="brand">DEVANGULAR333 <span>CREATIVE ENGINEERING</span></div><div class="scene" id="scene"></div><div class="caption"><div class="kicker" id="kicker"></div><h1 id="title"></h1><p id="body"></p></div><div class="footer">CODE2FLOW REVIEW PACK · v0.5.1-devangular333</div></div><script>
 const images = ${JSON.stringify(images)};
 const duration = Number(document.body.dataset.duration || 58);
 const esc = value => String(value).replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
@@ -223,7 +249,8 @@ function graphMarkup(progress) {
   return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1680 620" width="1680" height="620"><rect width="1680" height="620" rx="24" fill="'+bg+'"/>'+lines+circles+'<text x="66" y="68" fill="'+muted+'" font-family="Menlo,monospace" font-size="19" letter-spacing="4">GRAPH DELTA / REVIEW SIGNAL</text><text x="66" y="108" fill="'+ink+'" font-family="Arial,Helvetica,sans-serif" font-size="32" font-weight="700">before → after → evidence</text></svg>';
 }
 function jsonCard(){return '<div class="json-card"><span class="stamp">EXPORTED REVIEW JSON</span><div><span class="key">status</span>: <span class="value">"verified"</span></div><div><span class="key">note</span>: <span class="note">"Checked the running CRM path"</span></div><div><span class="key">relation</span>: <span class="value">"related"</span></div><div><span class="key">sourceRefs</span>: ["customers.html:2"]</div></div>'}
-function setFrame(frame){const t=frame.time, vertical=frame.vertical;const stage=document.getElementById('stage');stage.className=vertical?'stage-vertical':'';const scene=document.getElementById('scene'), kicker=document.getElementById('kicker'), title=document.getElementById('title'), body=document.getElementById('body');let html='';let k='',h='',p='';if(!vertical){if(t<7){html='<div class="graph-wrap">'+graphMarkup(Math.min(1,t/6))+'</div>';k='01 / GRAPH DELTA';h='Which flow changed?';p='A reviewer starts with visible route evidence.'}else if(t<15){html='<img src="'+images.report+'" style="transform:scale('+(1.02+(t-7)*.015)+')">';k='02 / REVISION INPUT';h='CRM v1 → CRM v2';p='Two labeled revisions. Synthetic data. Local report.'}else if(t<28){html='<img src="'+images.reviewed+'">';k='03 / EVIDENCE';h='Related, unrelated, source refs';p='Focus matching narrows the checklist. A person confirms behavior.'}else if(t<34){html='<img src="'+images.dashboard+'">';k='04 / RUNNING APP';h='Open the real sample flow';p='Dashboard → Customers';}else if(t<38){html='<img src="'+images.customers+'">';k='04 / RUNNING APP';h='Follow the changed route';p='Customers → Review order status';}else if(t<43){html='<img src="'+images.confirmed+'">';k='04 / RUNNING APP';h='Mark status reviewed';p='The confirmation is visible in the running synthetic app.'}else if(t<52){html=jsonCard();k='05 / OUTPUT';h='Export a review you can use';p='Status and note stay with the evidence.'}else{html='<img src="'+images.cover+'">';k='06 / DEVANGULAR333';h='Review the change. Keep the proof.';p='Try the demo · github.com/DevAngular333/design-os-code';}}else{if(t<3.5){html='<div class="graph-wrap">'+graphMarkup(Math.min(1,t/3))+'</div>';k='GRAPH DELTA';h='Find the changed flow';p='Code2Flow Review Pack'}else if(t<10){html='<img src="'+images.reviewed+'">';k='EVIDENCE';h='Related + source refs';p='CRM v1 → CRM v2 · synthetic'}else if(t<13){html='<img src="'+images.customers+'">';k='RUNNING APP';h='Open the route';p='Customers → Order status'}else if(t<19){html='<img src="'+images.confirmedVertical+'">';k='RUNNING APP';h='Mark reviewed';p='Confirmation shown in the real sample app'}else if(t<25){html=jsonCard();k='OUTPUT';h='Export JSON';p='Verified status + reviewer note'}else{html='<img src="'+images.cover+'">';k='DEVANGULAR333';h='Try the demo';p='github.com/DevAngular333/design-os-code';}}scene.innerHTML=html;kicker.textContent=k;title.textContent=h;body.textContent=p;}
+function frameImage(frames, t, start, end){if(!frames?.length)return '';const p=Math.max(0,Math.min(0.999,(t-start)/(end-start)));return frames[Math.floor(p*frames.length)];}
+function setFrame(frame){const t=frame.time, vertical=frame.vertical;const stage=document.getElementById('stage');stage.className=vertical?'stage-vertical':'';const scene=document.getElementById('scene'), kicker=document.getElementById('kicker'), title=document.getElementById('title'), body=document.getElementById('body');let html='';let k='',h='',p='';if(!vertical){if(t<7){html='<div class="graph-wrap">'+graphMarkup(Math.min(1,t/6))+'</div>';k='01 / GRAPH DELTA';h='Which flow changed?';p='A reviewer starts with visible route evidence.'}else if(t<15){html='<img src="'+frameImage(images.reportFlow,t,7,15)+'">';k='02 / REVISION INPUT';h='CRM v1 → CRM v2';p='Two labeled revisions. Synthetic data. Local report.'}else if(t<28){html='<img src="'+frameImage(images.reportFlow,t,15,28)+'">';k='03 / EVIDENCE';h='Status and note saved';p='The reviewer changes state while evidence stays visible.'}else if(t<34){html='<img class="ui-capture" src="'+frameImage(images.appFlow,t,28,34)+'">';k='04 / RUNNING APP';h='Open the real sample flow';p='Dashboard → Customers';}else if(t<38){html='<img class="ui-capture" src="'+frameImage(images.appFlow,t,34,38)+'">';k='04 / RUNNING APP';h='Follow the changed route';p='Customers → Review order status';}else if(t<43){html='<img class="ui-capture" src="'+frameImage(images.appFlow,t,38,43)+'">';k='04 / RUNNING APP';h='Mark status reviewed';p='The confirmation is visible in the running synthetic app.'}else if(t<52){html=jsonCard();k='05 / OUTPUT';h='Export a review you can use';p='Status and note stay with the evidence.'}else{html='<img src="'+images.cover+'">';k='06 / DEVANGULAR333';h='Review the change. Keep the proof.';p='Try the demo · github.com/DevAngular333/design-os-code';}}else{if(t<3.5){html='<div class="graph-wrap">'+graphMarkup(Math.min(1,t/3))+'</div>';k='GRAPH DELTA';h='Find the changed flow';p='Code2Flow Review Pack'}else if(t<10){html='<img src="'+frameImage(images.reportFlow,t,3.5,10)+'">';k='EVIDENCE';h='Status + reviewer note';p='CRM v1 → CRM v2 · synthetic'}else if(t<13){html='<img class="ui-capture" src="'+frameImage(images.appFlow,t,10,13)+'">';k='RUNNING APP';h='Open the route';p='Customers → Order status'}else if(t<19){html='<img class="ui-capture" src="'+frameImage(images.appFlow,t,13,19)+'">';k='RUNNING APP';h='Mark reviewed';p='Confirmation shown in the real sample app'}else if(t<25){html=jsonCard();k='OUTPUT';h='Export JSON';p='Verified status + reviewer note'}else{html='<img src="'+images.cover+'">';k='DEVANGULAR333';h='Try the demo';p='github.com/DevAngular333/design-os-code';}}scene.innerHTML=html;kicker.textContent=k;title.textContent=h;body.textContent=p;}
 window.setFrame=setFrame;</script></body></html>`;
 }
 

@@ -34,3 +34,11 @@ separate checkout. The command starts loopback servers for `docs/` and
 The product source is synthetic and public-safe. The renderer records the product
 commit in the manifest and validates that the captured report export contains
 `status: verified` and the note `Checked the running CRM path`.
+
+The capture stage also writes short frame series for `report-flow` and `app-flow`.
+These series include the status selection, note entry, route navigation and the
+visible confirmation after `Mark status reviewed`; the stage consumes the series
+instead of holding a single UI screenshot for a long beat. Runtime scenes use a
+deliberate crop in the vertical cut so the app remains legible on a phone. Series
+images and rendered frames are local evidence under `.media-output/` and must not
+be committed to the public repository.
