@@ -25,7 +25,7 @@ jobs:
       - name: version must match the tag
         run: test "v$(node -p "require('./package.json').version")" = "${GITHUB_REF_NAME}"
       - name: stage the version on npm (approve it with `npm stage approve <stage-id>`)
-        run: npm stage publish . --provenance --access public
+        run: npm stage publish . --provenance --access public --tag dev
       - name: GitHub release with the tarball
         run: npm pack && gh release create "${GITHUB_REF_NAME}" ./*.tgz --title "${GITHUB_REF_NAME}" --generate-notes
         env: { GH_TOKEN: "${{ github.token }}" }
