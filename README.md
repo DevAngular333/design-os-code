@@ -4,9 +4,9 @@ Turn a web codebase into a local, evidence-backed Flow Canvas your product team 
 
 ## DevAngular333 Review Pack
 
-[![Review Pack preview](docs/assets/code2flow-review-pack-preview.gif)](https://devangular333.github.io/devangular333-portfolio/#review-pack-video)
+[![Review Pack preview](docs/assets/code2flow-review-pack-preview.gif)](https://namaiengineer.github.io/devangular333-portfolio/#review-pack-video)
 
-Watch the [58-second product video](https://github.com/DevAngular333/design-os-code/releases/download/v0.5.2-devangular333/code2flow-review-pack-launch-1080p.mp4) or open the [interactive demo](https://devangular333.github.io/devangular333-portfolio/review-pack-demo.html). The [poster](docs/assets/code2flow-review-pack-poster.png) remains available when a Markdown viewer does not play GIF/MP4 inline. The rerunnable [capture/render pipeline](docs/media-pipeline.md) stays local and keeps raw footage out of the public tree.
+Watch the [58-second product video](https://github.com/NamAIEngineer/design-os-code/releases/download/v0.5.2-devangular333/code2flow-review-pack-launch-1080p.mp4) or open the [interactive demo](https://namaiengineer.github.io/devangular333-portfolio/review-pack-demo.html). The [poster](docs/assets/code2flow-review-pack-poster.png) remains available when a Markdown viewer does not play GIF/MP4 inline. The rerunnable [capture/render pipeline](docs/media-pipeline.md) stays local and keeps raw footage out of the public tree.
 
 This release adds a reviewer workflow for a concrete question: **which screens
 and transitions changed, and what should a person check in the running app?**
@@ -30,7 +30,7 @@ npm run cli -- review fixtures/review-pack/crm-v2 \
 open /tmp/code2flow-review/review-pack.html
 ```
 
-Try the [public interactive Review Pack demo](https://devangular333.github.io/devangular333-portfolio/review-pack-demo.html)
+Try the [public interactive Review Pack demo](https://namaiengineer.github.io/devangular333-portfolio/review-pack-demo.html)
 before installing. It uses the included **synthetic** CRM revisions: the new
 order-status path is related to the focus terms, while a profile-settings
 change stays unrelated. The browser report is local-only; it does not inspect
@@ -59,7 +59,7 @@ Supported today: Next.js App Router, React Router (v6/v7), static HTML folders â
 ## Install
 
 ```bash
-git clone https://github.com/DevAngular333/design-os-code.git
+git clone https://github.com/NamAIEngineer/design-os-code.git
 cd design-os-code
 npm ci
 npm run build
